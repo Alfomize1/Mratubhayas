@@ -26,17 +26,51 @@ jobs:
 
     - name: Apply Compiler Bug Fixes
       run: |
-        echo "Applying patches..."
+        echo "Applying all code and icon patches..."
+        # 1. Receiver fix
         sed -i 's/catch (_: Exception)/catch (e: Exception)/g' app/src/main/java/com/mratubhayas/app/receiver/NiyamAlarmReceiver.kt
+
+        # 2. Sadhana progress bar fixes
         sed -i 's/progress = { progress }/progress = progress/g' app/src/main/java/com/mratubhayas/app/ui/SadhanaScreen.kt
         sed -i 's/progress = { totalProgress }/progress = totalProgress/g' app/src/main/java/com/mratubhayas/app/ui/SadhanaScreen.kt
+
+        # 3. AndroidManifest fix
         sed -i '/showOnLockScreen/d' app/src/main/AndroidManifest.xml
+
+        # 4. Themes fix
         sed -i '/windowShowWhenLocked/d' app/src/main/res/values/themes.xml
         sed -i '/windowTurnScreenOn/d' app/src/main/res/values/themes.xml
         sed -i '/windowKeepScreenOn/d' app/src/main/res/values/themes.xml
+
+        # 5. MainActivity icons
+        sed -i 's/Icons.Default.SelfImprovement/Icons.Default.PlayArrow/g' app/src/main/java/com/mratubhayas/app/MainActivity.kt
+        sed -i 's/Icons.Default.Alarm/Icons.Default.Notifications/g' app/src/main/java/com/mratubhayas/app/MainActivity.kt
+        sed -i 's/Icons.Default.NotificationsActive/Icons.Default.Notifications/g' app/src/main/java/com/mratubhayas/app/MainActivity.kt
         sed -i 's/Icons.Default.TrackChanges/Icons.Default.Star/g' app/src/main/java/com/mratubhayas/app/MainActivity.kt
         sed -i 's/Icons.Default.CalendarMonth/Icons.Default.DateRange/g' app/src/main/java/com/mratubhayas/app/MainActivity.kt
+
+        # 6. DhyanScreen icons
+        sed -i 's/filled.Stop/filled.Close/g' app/src/main/java/com/mratubhayas/app/ui/DhyanScreen.kt
+        sed -i 's/Icons.Default.Stop/Icons.Default.Close/g' app/src/main/java/com/mratubhayas/app/ui/DhyanScreen.kt
+
+        # 7. HomeScreen icons
+        sed -i 's/filled.SelfImprovement/filled.PlayArrow/g' app/src/main/java/com/mratubhayas/app/ui/HomeScreen.kt
         sed -i 's/Icons.Default.SelfImprovement/Icons.Default.PlayArrow/g' app/src/main/java/com/mratubhayas/app/ui/HomeScreen.kt
+        sed -i '/filled.Alarm/d' app/src/main/java/com/mratubhayas/app/ui/HomeScreen.kt
+        sed -i '/filled.CheckCircle/d' app/src/main/java/com/mratubhayas/app/ui/HomeScreen.kt
+
+        # 8. NiyamScreen icons
+        sed -i '/filled.Alarm/d' app/src/main/java/com/mratubhayas/app/ui/NiyamScreen.kt
+
+        # 9. SanskarScreen icons
+        sed -i 's/NotificationsActive/Notifications/g' app/src/main/java/com/mratubhayas/app/ui/SanskarScreen.kt
+
+        # 10. AlarmAlertActivity icons
+        sed -i 's/filled.Alarm/filled.Notifications/g' app/src/main/java/com/mratubhayas/app/AlarmAlertActivity.kt
+        sed -i 's/Icons.Default.Alarm/Icons.Default.Notifications/g' app/src/main/java/com/mratubhayas/app/AlarmAlertActivity.kt
+        sed -i 's/filled.Snooze/filled.Refresh/g' app/src/main/java/com/mratubhayas/app/AlarmAlertActivity.kt
+        sed -i 's/Icons.Default.Snooze/Icons.Default.Refresh/g' app/src/main/java/com/mratubhayas/app/AlarmAlertActivity.kt
+
         echo "All patches applied successfully!"
 
     - name: Setup Java
@@ -51,7 +85,15 @@ jobs:
         gradle-version: '8.2'
 
     - name: Build APK
-      run: gradle assembleDebug --stacktrace
+      run: |
+        gradle assembleDebug --stacktrace 2>&1 | tee build_output.log
+
+    - name: Show Compiler Errors
+      if: failure()
+      run: |
+        echo "=================== EXACT ERROR LINES ==================="
+        grep -E "e: |error:|Compilation error" build_output.log || tail -n 60 build_output.log
+        echo "========================================================="
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
