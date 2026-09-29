@@ -15,10 +15,7 @@ jobs:
 
     - name: Unpack Project
       run: |
-        if [ -f "MratuBhayasApp.zip" ]; then
-          echo "Extracting updated MratuBhayasApp.zip..."
-          unzip -o MratuBhayasApp.zip
-        fi
+        python3 -c "import zipfile, os; zipfile.ZipFile('MratuBhayasApp.zip').extractall('.') if os.path.exists('MratuBhayasApp.zip') else None"
         if [ -d ".github/workflows/app" ] && [ ! -d "app" ]; then
           echo "Copying fallback app folder to root..."
           cp -r .github/workflows/app ./app
@@ -76,7 +73,7 @@ jobs:
       if: failure()
       run: |
         echo "=================== ERROR LOG SUMMARY ==================="
-        grep -E "e: |error:|Compilation error" build_output.log || tail -n 60 build_output.log
+        grep -E "e: |error:|Compilation error" build_output.log 2>/dev/null || tail -n 60 build_output.log 2>/dev/null || true
         echo "========================================================="
 
     - name: Upload APK
