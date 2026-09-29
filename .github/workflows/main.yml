@@ -16,16 +16,28 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v4
 
-    - name: Extract ZIP if present
+    - name: Extract ZIP
       run: |
         if [ -f "MratuBhayasApp.zip" ]; then
-          echo "Found MratuBhayasApp.zip! Unzipping project files..."
-          unzip -o MratuBhayasApp.zip
+          echo "Extracting MratuBhayasApp.zip..."
+          python3 -c "
+import zipfile, os
+with zipfile.ZipFile('MratuBhayasApp.zip', 'r') as zf:
+    for member in zf.infolist():
+        clean_name = member.filename.replace('\\\\', '/').replace('\\', '/')
+        target = os.path.join('.', clean_name)
+        if clean_name.endswith('/'):
+            os.makedirs(target, exist_ok=True)
+        else:
+            os.makedirs(os.path.dirname(target), exist_ok=True)
+            with open(target, 'wb') as f:
+                f.write(zf.read(member))
+"
         fi
-        echo "Root directory contents:"
+        echo "Root contents:"
         ls -la
         if [ -d "app" ]; then
-          echo "App directory contents:"
+          echo "App contents:"
           ls -la app/
         fi
 
