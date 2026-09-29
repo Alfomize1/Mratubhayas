@@ -24,6 +24,74 @@ jobs:
         echo "App contents:"
         ls -la app/
 
+    - name: Apply Compiler Bug Fixes
+      run: |
+        python3 - << 'EOF'
+        import os
+
+        def replace_in_file(path, old, new):
+            if os.path.exists(path):
+                with open(path, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                content = content.replace(old, new)
+                with open(path, 'w', encoding='utf-8') as f:
+                    f.write(content)
+                print(f"Updated {path}")
+
+        # 1. Fix invalid catch parameter in NiyamAlarmReceiver
+        replace_in_file(
+            'app/src/main/java/com/mratubhayas/app/receiver/NiyamAlarmReceiver.kt',
+            'catch (_: Exception)',
+            'catch (e: Exception)'
+        )
+
+        # 2. Fix LinearProgressIndicator lambdas in SadhanaScreen
+        replace_in_file(
+            'app/src/main/java/com/mratubhayas/app/ui/SadhanaScreen.kt',
+            'progress = { progress }',
+            'progress = progress'
+        )
+        replace_in_file(
+            'app/src/main/java/com/mratubhayas/app/ui/SadhanaScreen.kt',
+            'progress = { totalProgress }',
+            'progress = totalProgress'
+        )
+
+        # 3. Remove non-existent showOnLockScreen attribute from AndroidManifest
+        manifest_path = 'app/src/main/AndroidManifest.xml'
+        if os.path.exists(manifest_path):
+            with open(manifest_path, 'r', encoding='utf-8') as f:
+                lines = [line for line in f if 'showOnLockScreen' not in line]
+            with open(manifest_path, 'w', encoding='utf-8') as f:
+                f.writelines(lines)
+            print(f"Updated {manifest_path}")
+
+        # 4. Fix icons in MainActivity and HomeScreen
+        replace_in_file(
+            'app/src/main/java/com/mratubhayas/app/MainActivity.kt',
+            'Icons.Default.TrackChanges',
+            'Icons.Default.Star'
+        )
+        replace_in_file(
+            'app/src/main/java/com/mratubhayas/app/MainActivity.kt',
+            'Icons.Default.CalendarMonth',
+            'Icons.Default.DateRange'
+        )
+        replace_in_file(
+            'app/src/main/java/com/mratubhayas/app/ui/HomeScreen.kt',
+            'Icons.Default.SelfImprovement',
+            'Icons.Default.PlayArrow'
+        )
+
+        # 5. Add coroutines to app/build.gradle.kts
+        replace_in_file(
+            'app/build.gradle.kts',
+            'implementation("androidx.work:work-runtime-ktx:2.9.0")',
+            'implementation("androidx.work:work-runtime-ktx:2.9.0")\n    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")'
+        )
+        print("All patches applied successfully!")
+        EOF
+
     - name: Setup Java
       uses: actions/setup-java@v4
       with:
