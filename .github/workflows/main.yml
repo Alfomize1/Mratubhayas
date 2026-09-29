@@ -26,89 +26,18 @@ jobs:
 
     - name: Apply Compiler Bug Fixes
       run: |
-        python3 - << 'EOF'
-        import os
-
-        def replace_in_file(path, old, new):
-            if os.path.exists(path):
-                with open(path, 'r', encoding='utf-8') as f:
-                    content = f.read()
-                content = content.replace(old, new)
-                with open(path, 'w', encoding='utf-8') as f:
-                    f.write(content)
-                print(f"Updated {path}")
-
-        # 1. Fix invalid catch parameter in NiyamAlarmReceiver
-        replace_in_file(
-            'app/src/main/java/com/mratubhayas/app/receiver/NiyamAlarmReceiver.kt',
-            'catch (_: Exception)',
-            'catch (e: Exception)'
-        )
-
-        # 2. Fix LinearProgressIndicator lambdas in SadhanaScreen
-        replace_in_file(
-            'app/src/main/java/com/mratubhayas/app/ui/SadhanaScreen.kt',
-            'progress = { progress }',
-            'progress = progress'
-        )
-        replace_in_file(
-            'app/src/main/java/com/mratubhayas/app/ui/SadhanaScreen.kt',
-            'progress = { totalProgress }',
-            'progress = totalProgress'
-        )
-
-        # 3. Remove non-existent showOnLockScreen attribute from AndroidManifest
-        manifest_path = 'app/src/main/AndroidManifest.xml'
-        if os.path.exists(manifest_path):
-            with open(manifest_path, 'r', encoding='utf-8') as f:
-                lines = [line for line in f if 'showOnLockScreen' not in line]
-            with open(manifest_path, 'w', encoding='utf-8') as f:
-                f.writelines(lines)
-            print(f"Updated {manifest_path}")
-
-        # 4. Fix themes.xml (remove invalid window attributes that failed AAPT2)
-        themes_path = 'app/src/main/res/values/themes.xml'
-        if os.path.exists(themes_path):
-            clean_themes = """<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <style name="Theme.MratuBhayas" parent="android:Theme.Material.NoActionBar">
-        <item name="android:statusBarColor">@color/oled_dark</item>
-        <item name="android:navigationBarColor">@color/oled_dark</item>
-        <item name="android:windowBackground">@color/oled_dark</item>
-    </style>
-
-    <style name="Theme.MratuBhayas.FullScreenAlarm" parent="Theme.MratuBhayas" />
-</resources>
-"""
-            with open(themes_path, 'w', encoding='utf-8') as f:
-                f.write(clean_themes)
-            print(f"Updated {themes_path}")
-
-        # 5. Fix icons in MainActivity and HomeScreen
-        replace_in_file(
-            'app/src/main/java/com/mratubhayas/app/MainActivity.kt',
-            'Icons.Default.TrackChanges',
-            'Icons.Default.Star'
-        )
-        replace_in_file(
-            'app/src/main/java/com/mratubhayas/app/MainActivity.kt',
-            'Icons.Default.CalendarMonth',
-            'Icons.Default.DateRange'
-        )
-        replace_in_file(
-            'app/src/main/java/com/mratubhayas/app/ui/HomeScreen.kt',
-            'Icons.Default.SelfImprovement',
-            'Icons.Default.PlayArrow'
-        )
-
-        # 6. Add coroutines to app/build.gradle.kts
-        replace_in_file(
-            'app/build.gradle.kts',
-            'implementation("androidx.work:work-runtime-ktx:2.9.0")',
-            'implementation("androidx.work:work-runtime-ktx:2.9.0")\n    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")'
-        )
-        print("All patches applied successfully!")
-        EOF
+        echo "Applying patches..."
+        sed -i 's/catch (_: Exception)/catch (e: Exception)/g' app/src/main/java/com/mratubhayas/app/receiver/NiyamAlarmReceiver.kt
+        sed -i 's/progress = { progress }/progress = progress/g' app/src/main/java/com/mratubhayas/app/ui/SadhanaScreen.kt
+        sed -i 's/progress = { totalProgress }/progress = totalProgress/g' app/src/main/java/com/mratubhayas/app/ui/SadhanaScreen.kt
+        sed -i '/showOnLockScreen/d' app/src/main/AndroidManifest.xml
+        sed -i '/windowShowWhenLocked/d' app/src/main/res/values/themes.xml
+        sed -i '/windowTurnScreenOn/d' app/src/main/res/values/themes.xml
+        sed -i '/windowKeepScreenOn/d' app/src/main/res/values/themes.xml
+        sed -i 's/Icons.Default.TrackChanges/Icons.Default.Star/g' app/src/main/java/com/mratubhayas/app/MainActivity.kt
+        sed -i 's/Icons.Default.CalendarMonth/Icons.Default.DateRange/g' app/src/main/java/com/mratubhayas/app/MainActivity.kt
+        sed -i 's/Icons.Default.SelfImprovement/Icons.Default.PlayArrow/g' app/src/main/java/com/mratubhayas/app/ui/HomeScreen.kt
+        echo "All patches applied successfully!"
 
     - name: Setup Java
       uses: actions/setup-java@v4
