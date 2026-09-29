@@ -13,11 +13,16 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v4
 
-    - name: Unpack Project
+    - name: Move App Folder to Root
       run: |
-        if [ -f "MratuBhayasApp.zip" ]; then
-          unzip -o MratuBhayasApp.zip
+        if [ -d ".github/workflows/app" ]; then
+          echo "Copying app folder to root..."
+          cp -r .github/workflows/app ./app
         fi
+        echo "Root folders:"
+        ls -la
+        echo "App contents:"
+        ls -la app/
 
     - name: Setup Java
       uses: actions/setup-java@v4
@@ -31,7 +36,7 @@ jobs:
         gradle-version: '8.2'
 
     - name: Build APK
-      run: gradle assembleDebug
+      run: gradle assembleDebug --stacktrace
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
