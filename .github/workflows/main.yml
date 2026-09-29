@@ -16,6 +16,19 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v4
 
+    - name: Extract ZIP if present
+      run: |
+        if [ -f "MratuBhayasApp.zip" ]; then
+          echo "Found MratuBhayasApp.zip! Unzipping project files..."
+          unzip -o MratuBhayasApp.zip
+        fi
+        echo "Root directory contents:"
+        ls -la
+        if [ -d "app" ]; then
+          echo "App directory contents:"
+          ls -la app/
+        fi
+
     - name: Set up JDK 17
       uses: actions/setup-java@v4
       with:
