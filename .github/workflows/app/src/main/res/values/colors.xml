@@ -1,0 +1,8 @@
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="oled_dark">#FF0D0E11</color>
+    <color name="oled_card">#FF1A1C23</color>
+    <color name="amber_gold">#FFFFB300</color>
+    <color name="accent_cyan">#FF00E5FF</color>
+</resources>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.MratuBhayas" parent="android:Theme.Material.NoActionBar">
+        <item name="android:statusBarColor">@color/oled_dark</item>
+        <item name="android:navigationBarColor">@color/oled_dark</item>
+        <item name="android:windowBackground">@color/oled_dark</item>
+    </style>
+
+    <style name="Theme.MratuBhayas.FullScreenAlarm" parent="Theme.MratuBhayas">
+        <item name="android:windowShowWhenLocked">true</item>
+        <item name="android:windowTurnScreenOn">true</item>
+        <item name="android:windowKeepScreenOn">true</item>
+    </style>
+</resources>
